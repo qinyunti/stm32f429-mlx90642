@@ -1,11 +1,17 @@
 #include "MLX90642.h"
 #include "xprintf.h"
-
+#include "clock.h"
+static uint32_t u32_diff(uint32_t pre, uint32_t now){
+    if(now >= pre){
+        return now-pre;
+    }else{
+        return 0xFFFFFFFF - pre + now + 1;
+    }
+}
 int mlx90642_test(int n)
 {
     int status = 0; 
     static uint16_t mlxto[MLX90642_TOTAL_NUMBER_OF_PIXELS + 1];
-    xprintf("num = %d\r\n",n);
     if(n<=0){
         n=1;
     }
@@ -18,7 +24,7 @@ int mlx90642_test(int n)
     }else{
         xprintf("ver:%d.%d.%d\r\n",version[0],version[1],version[2]);
     }
-    MLX90642_SetMeasMode(SA_90642_DEFAULT, MLX90642_STEP_MEAS_MODE); 
+    //MLX90642_SetMeasMode(SA_90642_DEFAULT, MLX90642_STEP_MEAS_MODE); 
     if(status < 0){
         xprintf("SetMeasMode err %d\r\n",status);
     }
@@ -35,10 +41,15 @@ int mlx90642_test(int n)
     MLX90642_SetI2CMode(SA_90642_DEFAULT, MLX90642_I2C_MODE_FM_PLUS); 
     MLX90642_Set_Delay(20ul);
 
+    uint32_t t0;
+    uint32_t t1;
     while(n--){
         xprintf("Start GetImage\r\n");
         /* Read out the image data */
+        t0 = get_ticks();
         status = MLX90642_GetImage(SA_90642_DEFAULT, mlxto);
+        t1 = get_ticks();
+        xprintf("used:%dmS\r\n",u32_diff(t0,t1));
         if(status < 0){
             xprintf("MLX90642_GetImage err %d\r\n",status);
         }else{

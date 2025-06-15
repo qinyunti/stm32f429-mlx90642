@@ -94,7 +94,7 @@ static ili9341v_dev_st s_lcd_itf_dev =
     .init = port_lcd_init,
     .deinit = port_lcd_deinit,
 
-    .buffer = (uint16_t*)0,
+    .buffer = (uint16_t*)0x90000000,
 };
 
 /******************************************************************************
@@ -153,7 +153,7 @@ void lcd_itf_set_pixel(uint16_t x, uint16_t y, uint16_t rgb565)
     //{
     //    return -1;
     //}
-    s_lcd_itf_dev.buffer[y*LCD_HSIZE + x] = (uint16_t)((rgb565>>8)&0xFF) | (uint16_t)((rgb565<<8) & 0xFF00);
+    s_lcd_itf_dev.buffer[y*LCD_HSIZE + x] = rgb565;
 }
 
 /**
@@ -164,7 +164,7 @@ void lcd_itf_set_pixel(uint16_t x, uint16_t y, uint16_t rgb565)
 */
 void lcd_itf_set_pixel_0(uint32_t offset, uint16_t rgb565)
 {
-    s_lcd_itf_dev.buffer[offset] = (uint16_t)((rgb565>>8)&0xFF) | (uint16_t)((rgb565<<8) & 0xFF00);
+    s_lcd_itf_dev.buffer[offset] = rgb565;
 }
 
 /**
@@ -177,7 +177,7 @@ void lcd_itf_set_pixel_0(uint32_t offset, uint16_t rgb565)
 uint16_t lcd_itf_get_pixel(uint16_t x, uint16_t y)
 {
     uint16_t color = s_lcd_itf_dev.buffer[y*LCD_HSIZE + x]; 
-    return ((uint16_t)(color>>8) | (uint16_t)(color<<8));
+    return color;
 }
 
 /**
@@ -192,6 +192,27 @@ uint16_t lcd_itf_get_pixel(uint16_t x, uint16_t y)
 void lcd_itf_fill_direct(uint16_t x, uint16_t w, uint16_t y, uint16_t h, uint16_t* buffer)
 {
 		ili9341v_sync(&s_lcd_itf_dev, x, x+w-1, y, y+h-1, buffer, w*h*2);
+}
+
+/**
+ * \fn lcd_itf_fill
+ * 填充区域为指定颜色
+ * \param[in] x x开始坐标位置
+ * \param[in] w 宽度
+ * \param[in] y y开始坐标位置
+ * \param[in] h 高度
+ * \param[in] buffer rgb565颜色缓存区
+*/
+void lcd_itf_fill(uint16_t x, uint16_t w, uint16_t y, uint16_t h, uint16_t rgb)
+{
+	uint16_t* s = s_lcd_itf_dev.buffer; 
+	uint16_t* p;
+	for(int i=0; i<h; i++){
+		p = s + y*LCD_HSIZE + x;
+		for(int j=0; j<w; j++){
+			*p++ = rgb;
+		}
+	}
 }
 
 /**

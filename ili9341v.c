@@ -16,7 +16,7 @@ typedef struct
 static ili9341v_cmd_st s_ili9341v_cmd_init_list[]=
 {
     {ILI9341V_CMD_SLPOUT,{0   },0,120},  /**< SLPOUT (11h): Sleep Out */
-    {ILI9341V_CMD_MADCTL,{0x08   },1,0},    /**< MADCTL (36h): Memory Data Access Control */
+    {ILI9341V_CMD_MADCTL,{0x68   },1,0},    /**< MADCTL (36h): Memory Data Access Control */
     {ILI9341V_CMD_COLMOD,{0x55},1,0},    /**< 16bit/pixel 65K         */
     //{ILI9341V_CMD_PORCTRL,{0x0C,0x0C,0x00,0x33,0x33},5,0},  /**< 默认值 */
     //{ILI9341V_CMD_GCTRL,{0x35},1,0},                        /**< 默认值 */
@@ -200,9 +200,9 @@ int ili9341v_init(ili9341v_dev_st* dev)
     }
 
 		uint16_t tmp = 0x00;
-		ili9341v_set_windows(dev, 0, 240-1, 0, 320-1);
+		ili9341v_set_windows(dev, 0, ILI9341V_HSIZE-1, 0, ILI9341V_VSIZE-1);
     ili9341v_write_cmd(dev,ILI9341V_CMD_RAMWR);
-		for(int i=0; i<240*320; i++){
+		for(int i=0; i<ILI9341V_HSIZE*ILI9341V_VSIZE; i++){
 			ili9341v_write_data(dev, (uint8_t*)(&tmp), 2);
 		}
     return 0;

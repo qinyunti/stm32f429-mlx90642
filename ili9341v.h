@@ -9,8 +9,8 @@
 
 #define ILI9341V_CHECK_PARAM 1
 
-#define ILI9341V_HSIZE 240
-#define ILI9341V_VSIZE 320
+#define ILI9341V_HSIZE 320
+#define ILI9341V_VSIZE 240
 
 typedef void    (*ili9341v_set_dcx_pf)(uint8_t val);                          /**< DCX引脚操作接口,val=1为数据和参数, val=0为命令   */
 typedef void    (*ili9341v_set_reset_pf)(uint8_t val);                        /**< 复位引脚操作,val=1输出高,val=0输出低            */

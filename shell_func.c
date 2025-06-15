@@ -797,7 +797,7 @@ static void mlx90642testfunc(uint8_t* param)
   #else
   char* p =(char*)param;
   while(1){  /* 跳过%*s部分 */
-    if((*p > 'z') || (*p < 'a')){
+    if(*p == ' '){
       break;
     }else{
       p++;
@@ -808,7 +808,6 @@ static void mlx90642testfunc(uint8_t* param)
   num = tmp;
   #endif
   {
-    xprintf("num=%d\r\n",num);
     mlx90642_test(num);
   }
 }

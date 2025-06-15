@@ -11,6 +11,8 @@
 #include "shell.h"
 #include "shell_func.h"
 #include "lcd_test.h"
+#include "MLX90642_disp.h"
+#include "lcd_itf.h"
 
 #if defined(USE_IS42S16320F)
 	#define SDRAM_SIZE (64ul*1024ul*1024ul)
@@ -122,11 +124,13 @@ static int user_main(void)
 	sdram_init();
 
 	flash_itf_init();
-	//lcd_test();
+	lcd_itf_init();
 
 	shell_set_itf(shell_read, shell_write, (shell_cmd_cfg*)g_shell_cmd_list_ast, 1);
+	mlx90642_disp_init();
 	while(1){
 		shell_exec();
+		mlx90642_disp();
 	}
 	return 0;
 }

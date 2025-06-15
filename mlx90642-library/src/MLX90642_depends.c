@@ -103,12 +103,12 @@ int MLX90642_I2CRead(uint8_t slaveAddr, uint16_t startAddress, uint16_t nMemAddr
         if(res != 0){
             return res;
         }
-        tmp = byte_tmp<<8;
+        tmp = (uint16_t)byte_tmp<<8;
         res = io_iic_read(&iic_dev,&byte_tmp,0);
         if(res != 0){
             return res;
         }
-        tmp |= byte_tmp;
+        tmp |= (uint16_t)byte_tmp;
         rData[i] = tmp;
     }
     io_iic_stop(&iic_dev);

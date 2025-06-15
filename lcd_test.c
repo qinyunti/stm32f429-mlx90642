@@ -4,9 +4,9 @@
 
 static void rgb_test(void)
 {
-    for(int x=0;x<240;x++)
+    for(int x=0;x<ILI9341V_HSIZE;x++)
     {
-        for(int y=0;y<320;y++)
+        for(int y=0;y<ILI9341V_VSIZE;y++)
         {
             lcd_itf_set_pixel(x, y, 0xF800);
         }
@@ -14,9 +14,9 @@ static void rgb_test(void)
     lcd_itf_sync();
 	clock_delay(1000);
 
-    for(int x=0;x<240;x++)
+    for(int x=0;x<ILI9341V_HSIZE;x++)
     {
-        for(int y=0;y<320;y++)
+        for(int y=0;y<ILI9341V_VSIZE;y++)
         {
             lcd_itf_set_pixel(x, y, 0x07E0);
         }
@@ -24,9 +24,9 @@ static void rgb_test(void)
     lcd_itf_sync();
 	clock_delay(1000);
 
-    for(int x=0;x<240;x++)
+    for(int x=0;x<ILI9341V_HSIZE;x++)
     {
-        for(int y=0;y<320;y++)
+        for(int y=0;y<ILI9341V_VSIZE;y++)
         {
             lcd_itf_set_pixel(x, y, 0x001F);
         }
@@ -46,45 +46,45 @@ static void rgb_test(void)
  */
 static void rgb_test_direct(void)
 {
-    for(int x=0;x<240;x++)
+    for(int x=0;x<ILI9341V_HSIZE;x++)
     {
-        for(int y=0;y<320;y++)
+        for(int y=0;y<ILI9341V_VSIZE;y++)
         {
             lcd_itf_set_pixel_direct(x, y, RGB(0,0,0));
         }
     }
 	clock_delay(1000);
 
-    for(int x=0;x<240;x++)
+    for(int x=0;x<ILI9341V_HSIZE;x++)
     {
-        for(int y=0;y<320;y++)
+        for(int y=0;y<ILI9341V_VSIZE;y++)
         {
             lcd_itf_set_pixel_direct(x, y, RGB(255,0,0));
         }
     }
 	clock_delay(1000);
 
-    for(int x=0;x<240;x++)
+    for(int x=0;x<ILI9341V_HSIZE;x++)
     {
-        for(int y=0;y<320;y++)
+        for(int y=0;y<ILI9341V_VSIZE;y++)
         {
             lcd_itf_set_pixel_direct(x, y, RGB(0,255,0));
         }
     }
 	clock_delay(1000);
 
-    for(int x=0;x<240;x++)
+    for(int x=0;x<ILI9341V_HSIZE;x++)
     {
-        for(int y=0;y<320;y++)
+        for(int y=0;y<ILI9341V_VSIZE;y++)
         {
             lcd_itf_set_pixel_direct(x, y, RGB(0,0,255));
         }
     }
 	clock_delay(1000);
 
-    for(int x=0;x<240;x++)
+    for(int x=0;x<ILI9341V_HSIZE;x++)
     {
-        for(int y=0;y<320;y++)
+        for(int y=0;y<ILI9341V_VSIZE;y++)
         {
             lcd_itf_set_pixel_direct(x, y, RGB(255,255,255));
         }
