@@ -6,8 +6,7 @@
 #include "spi.h"
 
 #define LCD_SPI  5
-#define LCD_HSIZE ILI9341V_HSIZE
-#define LCD_VSIZE ILI9341V_VSIZE
+
 
 static void port_lcd_set_dcx(uint8_t val)
 {
@@ -208,7 +207,7 @@ void lcd_itf_fill(uint16_t x, uint16_t w, uint16_t y, uint16_t h, uint16_t rgb)
 	uint16_t* s = s_lcd_itf_dev.buffer; 
 	uint16_t* p;
 	for(int i=0; i<h; i++){
-		p = s + y*LCD_HSIZE + x;
+		p = s + (y+i)*LCD_HSIZE + x;
 		for(int j=0; j<w; j++){
 			*p++ = rgb;
 		}

@@ -2,6 +2,7 @@
 #include "gpio.h"
 #include "clock.h"
 #include "spi.h"
+#include "xprintf.h"
 
 static uint32_t reg_base[6]={0x40013000,0x40003800,0x40003C00,0x40013400,0x40015000,0x40015400};
 

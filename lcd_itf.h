@@ -6,6 +6,9 @@
 #endif
 
 #include <stdint.h>
+#include "ili9341v.h"
+#define LCD_HSIZE ILI9341V_HSIZE
+#define LCD_VSIZE ILI9341V_VSIZE
 
 /**
  * \fn lcd_itf_init

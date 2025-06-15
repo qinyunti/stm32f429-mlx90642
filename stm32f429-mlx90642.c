@@ -125,6 +125,7 @@ static int user_main(void)
 
 	flash_itf_init();
 	lcd_itf_init();
+	//lcd_test();
 
 	shell_set_itf(shell_read, shell_write, (shell_cmd_cfg*)g_shell_cmd_list_ast, 1);
 	mlx90642_disp_init();

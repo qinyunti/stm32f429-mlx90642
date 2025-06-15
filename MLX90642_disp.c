@@ -1,37 +1,65 @@
 #include <stdint.h>
+#include <math.h>
 #include "MLX90642.h"
 #include "xprintf.h"
 #include "clock.h"
 #include "lcd_itf.h"
 
-static uint8_t s_gray[32*24];
 static uint16_t s_temp[MLX90642_TOTAL_NUMBER_OF_PIXELS + 1];
+static uint8_t s_r[32*24];
+static uint8_t s_g[32*24];
+static uint8_t s_b[32*24];
 
-#define mlx90642_abs(x)      ((x)>0?(x):-(x))
-
-/* -40 0
- * x   y
- * 260 255
- * k = (255-0)/(260-(-40))=(y-0)/(x-(-40))
- * 255/300 = y/(x+40)
- * y = 255*(x+40)/300
- */
-static void mlx90642_temp2gray(uint16_t* buffer, uint8_t* gray){
-    int idx = 0;
-    int temp;
-    for(int i=0; i<32; i++){
-        for(int j=0; j<24; j++){
-            temp = ((int16_t)buffer[i]*2+50) / 100;   /* 除以50对应温度,四舍五入 */
-            gray[idx] = (uint8_t)((int32_t)255*((int32_t)temp+40)/(int32_t)300);
-            idx++;
+void temp2rgb(int16_t* temp)
+{
+    int16_t maxtemp = 0;
+    int16_t t;
+    uint8_t gray;
+    uint8_t gray_max=255;
+    for(int i=0;i<32*24;i++){
+        if(temp[i]>maxtemp){
+            maxtemp = temp[i];
         }
     }
-}
-
-static void mlx90642_gray2rgb(uint8_t gray, uint8_t* r, uint8_t* g, uint8_t* b){
-    *r=mlx90642_abs((int)0-(int)gray);
-    *g=mlx90642_abs((int)127-(int)gray);
-    *b=mlx90642_abs((int)255-(int)gray);
+#if 0
+    t = ((int16_t)maxtemp*2+50) / 100;   /* 除以50对应温度,四舍五入 */
+    gray_max = (uint8_t)(((int32_t)255*((int32_t)t+40))/(int32_t)300);
+#else
+    gray_max = 255;
+#endif
+	for(int i=0;i<32*24;i++){
+		/* 转温度为灰度 
+        * -40 0
+        * x   y
+        * 260 255
+        * k = (255-0)/(260-(-40))=(y-0)/(x-(-40))
+        * 255/300 = y/(x+40)
+        * y = 255*(x+40)/300
+        */
+        t = ((int16_t)temp[i]*2+50) / 100;   /* 除以50对应温度,四舍五入 */
+        gray = (uint8_t)(((int32_t)255*((int32_t)t+40))/(int32_t)300);
+		/* 计算 */
+        if(gray<=(gray_max/8)){
+            s_r[i]=0;
+            s_g[i]=0;
+            s_b[i]=(gray*255)/64;
+        }
+        else if(gray<=(gray_max*3/8)){
+            s_r[i]=0;
+            s_g[i]=((gray-64)*255)/64;
+            s_b[i]=((127-gray)*255)/64;
+        }
+        else if(gray<=(gray_max*5)/8){
+            s_r[i]=((gray-128)*255)/64;
+            s_g[i]=255;
+            s_b[i]=0;
+        }
+        else{
+            s_r[i]=255;
+            s_g[i]=((255-gray)*255)/64;
+            s_b[i]=0;
+        }
+	}	
 }
 
 /**
@@ -42,9 +70,6 @@ static void mlx90642_gray2rgb(uint8_t gray, uint8_t* r, uint8_t* g, uint8_t* b){
 #define RGB(r,g,b) (((uint16_t)r&0xF8) | ((uint16_t)g>>5) | ((((uint16_t)g&0xE0) | ((uint16_t)b&0x1F))<<8))
 
 int mlx90642_disp(void){
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
     int status;
     int  idx = 0;
 
@@ -66,12 +91,10 @@ int mlx90642_disp(void){
     }else{
         xprintf("MLX90642_GetImage ok\r\n");
     }
-
-    mlx90642_temp2gray(s_temp, s_gray);
-    for(int x=0; x<32; x++){
-        for(int y=0; y<24; y++){
-            mlx90642_gray2rgb(s_gray[idx], &r, &g, &b);
-            lcd_itf_fill(x*10,10,y*10,10,RGB(r,g,b));
+    temp2rgb((int16_t*)s_temp);
+    for(int y=0; y<24; y++){
+        for(int x=0; x<32; x++){
+            lcd_itf_fill(x*10,10,y*10,10,RGB(s_r[idx],s_g[idx],s_b[idx]));
             idx++;
         }
     }
@@ -101,6 +124,7 @@ int mlx90642_disp_init(void)
     }else{
         xprintf("MLX90642_Init ok\r\n");
     }
+    MLX90642_SetRefreshRate(SA_90642_DEFAULT, MLX90642_REF_RATE_2HZ); 
     MLX90642_SetOutputFormat(SA_90642_DEFAULT, MLX90642_TEMPERATURE_OUTPUT); 
 
     MLX90642_SetI2CLevel(SA_90642_DEFAULT, MLX90642_I2C_LEVEL_VDD);
