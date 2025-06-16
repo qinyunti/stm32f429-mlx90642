@@ -13,7 +13,7 @@ CFLAGS := -mthumb -mcpu=cortex-m4 -fno-builtin --specs=nano.specs
 CFLAGS += -ffunction-sections -fdata-sections  -nostdlib
 CFLAGS += -Os -std=gnu99 -Wall -nostartfiles -g  -Imlx90642-library/inc -ICMSIS/ -I./
 LINKERFLAGS :=  --gc-sections
-obj-y += lcd_test.o MLX90642_disp.o io_iic.o mlx90642-library/src/MLX90642.o mlx90642-library/src/MLX90642_depends.o MLX90642_test.o ili9341v.o lcd_itf.o string.o stm32f429-mlx90642.o xmodem.o shell.o shell_func.o uart.o fifo.o clock.o spi.o gpio.o sdram.o xprintf.o spiflash.o spiflash_itf.o
+obj-y += dma.o lcd_test.o MLX90642_disp.o io_iic.o mlx90642-library/src/MLX90642.o mlx90642-library/src/MLX90642_depends.o MLX90642_test.o ili9341v.o lcd_itf.o string.o stm32f429-mlx90642.o xmodem.o shell.o shell_func.o uart.o fifo.o clock.o spi.o gpio.o sdram.o xprintf.o spiflash.o spiflash_itf.o
 
 all: stm32f429-mlx90642
 
