@@ -1,5 +1,9 @@
 #include <stdint.h>
 #include <math.h>
+
+#include "stm32f4_regs.h"
+#include "gpio.h"
+
 #include "MLX90642.h"
 #include "xprintf.h"
 #include "clock.h"
@@ -63,6 +67,25 @@ void temp2rgb(int16_t* temp)
 }
 
 /**
+ * temp 输入原始温度数据
+ * cnt 输入超过阈值的点数
+ * th 输入阈值温度
+ */
+static  int mlx90642_warn(int16_t* temp, int cnt, int th){
+    int n = 0;
+    for(int i=0; i<32*24; i++){
+        if(temp[i] >= th){
+            n++;
+        }
+    }
+    if(n >= cnt){
+        return 1;
+    }else{
+        return 0;
+    }
+}
+
+/**
  * Byte0         Byte1
  * D7~D3  D2~0   D7~5  D4~D0
  * R     |    G       |  B
@@ -82,23 +105,46 @@ int mlx90642_disp(void){
         }         
     }
 
-    xprintf("Start GetImage\r\n");
+    //xprintf("Start GetImage\r\n");
     /* Read out the image data */
     status = MLX90642_GetImage(SA_90642_DEFAULT, s_temp);
     if(status < 0){
         xprintf("MLX90642_GetImage err %d\r\n",status);
         return -1;
     }else{
-        xprintf("MLX90642_GetImage ok\r\n");
+        //xprintf("MLX90642_GetImage ok\r\n");
     }
     temp2rgb((int16_t*)s_temp);
     for(int y=0; y<24; y++){
+        //xprintf("\r\n");
         for(int x=0; x<32; x++){
+            //xprintf("%d ",s_temp[idx]);
             lcd_itf_fill(x*10,10,y*10,10,RGB(s_r[idx],s_g[idx],s_b[idx]));
             idx++;
         }
     }
     lcd_itf_sync();
+
+    static int s_warn_time = 0;
+    static int s_warn_state_pre = 0;
+    if(mlx90642_warn((int16_t*)s_temp,2,100*50)){
+        if(s_warn_state_pre==0){
+            s_warn_state_pre = 1;
+            xprintf("warn on!\r\n");
+        }
+	    gpio_write((void*)GPIOA_BASE, 'C', 8, 0);
+        s_warn_time = 10;
+    }else{
+        /* 延时取消告警 */
+        if(s_warn_time > 0){
+            s_warn_time--;
+            if(s_warn_time==0){
+                gpio_write((void*)GPIOA_BASE, 'C', 8, 1);
+                s_warn_state_pre = 0;
+                xprintf("warn off!\r\n");
+            }
+        }
+    }
     return 0;
 }
 
@@ -132,5 +178,13 @@ int mlx90642_disp_init(void)
     MLX90642_SetI2CMode(SA_90642_DEFAULT, MLX90642_I2C_MODE_FM_PLUS); 
     MLX90642_Set_Delay(20ul);
 
+    /* 蜂鸣器驱动引脚, 低使能 */
+    /**
+     * PC8 BEEP 
+     */
+	volatile uint32_t *RCC_AHB1ENR = (void *)(RCC_BASE + 0x30);
+	*RCC_AHB1ENR |= (1u<<2); /* GPIOC */
+	gpio_set((void*)GPIOA_BASE, 'C', 8, 0, GPIOx_MODER_MODERy_GPOUTPUT,GPIOx_OSPEEDR_OSPEEDRy_HIGH, GPIOx_PUPDR_PULLUP);
+	gpio_write((void*)GPIOA_BASE, 'C', 8, 1);
     return 0;
 }
